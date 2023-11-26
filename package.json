@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mysql2": "^3.2.4",
+    "node-cache": "^5.1.2",
+    "nodemailer": "^6.9.7",
+    "nodemon": "^2.0.22",
+    "otp-generator": "^4.0.1",
+    "reactjs-popup": "^2.0.5",
+    "redis": "^3.1.2",
+    "sequelize": "^6.31.1",
+    "sweetalert2": "^11.7.5",
+    "uuidv4": "^6.2.13"
+  }
+}
