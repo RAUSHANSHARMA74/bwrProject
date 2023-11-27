@@ -157,7 +157,6 @@ propertiesRoutes.get("/properties/id/:id", async (req, res) => {
 propertiesRoutes.get("/properties/sort", async (req, res) => {
   try {
     const keyValueArray = Object.entries(req.query);
-    console.log(keyValueArray)
 
     for (const [key, value] of keyValueArray) {
       if (value !== "ASC" && value !== "DESC") {
@@ -167,18 +166,9 @@ propertiesRoutes.get("/properties/sort", async (req, res) => {
         });
       }
     }
-    
-    const orderCriteria = keyValueArray.map(([key, value]) => {
-      if (key === "date") {
-        // For date, use sequelize.literal to handle the raw SQL expression
-        return [Sequelize.literal(`DATE(${key})`), value];
-      } else {
-        return [key, value];
-      }
-    });
 
     const propertiesDataSort = await PropertiesModel.findAll({
-      order: orderCriteria,
+      order: keyValueArray,
     });
 
     if (propertiesDataSort.length > 0) {
