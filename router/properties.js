@@ -2,18 +2,10 @@ const express = require("express");
 const { PropertiesModel } = require("../model/propertiesModel");
 const propertiesRoutes = express.Router();
 const NodeCache = require("node-cache");
-const { Op } = require("sequelize");
+const { Op , Sequelize} = require("sequelize");
 
 const myCache = new NodeCache();
-propertiesRoutes.post("/test", async(req, res)=>{
-  try {
-    
-    await PropertiesModel.create(req.body)
-    res.send({message:"done"})
-  } catch (error) {
-    console.log({message: "No properties data found",})
-  }
-})
+
 
 //API => http://localhost:5003/api/properties
 //GET ALL PROPERTIES DATA 
@@ -123,6 +115,7 @@ propertiesRoutes.get("/properties/query", async (req, res) => {
 });
 
 
+
 //API => http://localhost:5003/api/properties/51025992
 propertiesRoutes.get("/properties/id/:id", async (req, res) => {
   try {
@@ -159,10 +152,12 @@ propertiesRoutes.get("/properties/id/:id", async (req, res) => {
 
 //API FOR PRICE => http://localhost:5003/api/properties/sort?exact_price=ASC/DESC
 //API FOR AREA  => http://localhost:5003/api/properties/sort?area=ASC/DESC
+//API FOR DATE => http://localhost:5003/api/properties/sort?date=DESC/ASC
 // SORT PROPERTIES BY PRICE AND AREA BOTH (Low to High and High to Low)
 propertiesRoutes.get("/properties/sort", async (req, res) => {
   try {
     const keyValueArray = Object.entries(req.query);
+    console.log(keyValueArray)
 
     for (const [key, value] of keyValueArray) {
       if (value !== "ASC" && value !== "DESC") {
@@ -172,9 +167,18 @@ propertiesRoutes.get("/properties/sort", async (req, res) => {
         });
       }
     }
+    
+    const orderCriteria = keyValueArray.map(([key, value]) => {
+      if (key === "date") {
+        // For date, use sequelize.literal to handle the raw SQL expression
+        return [Sequelize.literal(`DATE(${key})`), value];
+      } else {
+        return [key, value];
+      }
+    });
 
     const propertiesDataSort = await PropertiesModel.findAll({
-      order: keyValueArray,
+      order: orderCriteria,
     });
 
     if (propertiesDataSort.length > 0) {

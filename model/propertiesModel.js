@@ -194,7 +194,7 @@ const PropertiesModel = sequelizeConnection.define("Properties", {
     type: Sequelize.STRING,
     allowNull: true,
   },
-  data: {
+  date: {
     type: Sequelize.DATE,
     defaultValue: Sequelize.NOW,
   },
