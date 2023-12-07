@@ -47,23 +47,28 @@ propertiesRoutes.get("/properties", async (req, res) => {
 //API => http://localhost:5003/api/properties/pagination?item=8&page=1
 propertiesRoutes.get("/properties/pagination", async (req, res) => {
   try {
-    let { item, page } = req.query;
-    page = page || 1;
-    item = item || 12; 
-    const offset = (page - 1) * item;
-    console.log(typeof page, typeof item, typeof offset)
-    const propertiesData = await PropertiesModel.findAll({
-      limit: Number(item), 
+    const { item, page } = req.query;
+    const itemsPerPage = item || 12;
+    const currentPage = page || 1;
+    
+    const offset = (currentPage - 1) * itemsPerPage;
+    
+    const propertiesData = await PropertiesModel.findAndCountAll({
+      limit: Number(itemsPerPage),
       offset: offset,
     });
-
-    if (propertiesData.length > 0) {
+    
+    const totalItems = propertiesData.count;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    if (propertiesData.rows.length > 0) {
       res.status(200).json({
         isError: false,
         message: "Successfully retrieved properties data",
-        currentPage: page,
-        dataLength: propertiesData.length,
-        propertiesData,
+        currentPage: currentPage,
+        totalPages: totalPages,
+        dataLength: propertiesData.rows.length,
+        propertiesData: propertiesData.rows,
       });
     } else {
       res.status(404).json({
@@ -71,6 +76,7 @@ propertiesRoutes.get("/properties/pagination", async (req, res) => {
         message: "No properties data found",
       });
     }
+    
   } catch (error) {
     console.error("Something went wrong in the /properties/pagination route:", error);
     res.status(500).json({
@@ -249,7 +255,14 @@ propertiesRoutes.get("/properties/range/:range", async (req, res) => {
 //search by keyword, category, location
 propertiesRoutes.get("/properties/search", async (req, res) => {
   try {
-    const { keyword, category, location } = req.query;
+    let { keyword, category, location, property_type, bedrooms, order, type,item, page, price_range, area_range } = req.query;
+    // console.log(price_range.split(","))
+    const itemsPerPage = item || 12;
+    const currentPage = page || 1;
+    // console.log(page)
+    const offset = (currentPage - 1) * itemsPerPage;
+
+    let orderClause = [];
     const whereClause = {};
 
     if (category) {
@@ -262,27 +275,71 @@ propertiesRoutes.get("/properties/search", async (req, res) => {
     }
     if (keyword) {
       whereClause[Op.or] = [
+        { category: { [Op.like]: `%${keyword}%` } },
         { title: { [Op.like]: `%${keyword}%` } },
         { property_type: { [Op.like]: `%${keyword}%` } },
         { city: { [Op.like]: `%${keyword}%` } },
         { state: { [Op.like]: `%${keyword}%` } },
         { description: { [Op.like]: `%${keyword}%` } },
+        { location: { [Op.like]: `%${keyword}%` } },
+        { ownership: { [Op.like]: `%${keyword}%` } },
+        { possession_status: { [Op.like]: `%${keyword}%` } },
+        { entrance_facing: { [Op.like]: `%${keyword}%` } },
+        { floor_no: { [Op.like]: `%${keyword}%` } },
+        { amenities: { [Op.like]: `%${keyword}%` } },
+        { ownerShip: { [Op.like]: `%${keyword}%` } },
+        { no_of_living_room: { [Op.like]: `%${keyword}%` } },
+        { no_of_balcony: { [Op.like]: `%${keyword}%` } },
+        { no_of_kitchen: { [Op.like]: `%${keyword}%` } },
         { no_of_bedroom: { [Op.like]: `%${keyword}%` } },
         { no_of_bathroom: { [Op.like]: `%${keyword}%` } },
       ];
     }
 
-    const propertiesData = await PropertiesModel.findAll({
+    if(property_type){
+      whereClause.property_type = property_type;
+    }
+
+    if(bedrooms){
+      whereClause.no_of_bedroom = bedrooms
+    }
+    if(order!="empty" && type!="empty" && order!="" && type!=""){
+      orderClause = [[type, order]]
+    }
+  
+    if(price_range){
+      whereClause.exact_price = {
+        [Op.between]: price_range.split(",").map(Number)
+      }
+      // console.log(price_range.split(","))
+    }
+
+    if(area_range){
+      whereClause.area = {
+        [Op.between]: area_range.split(",").map(Number)
+      }
+      // console.log(area_range.split(","))
+    }
+
+    const propertiesData = await PropertiesModel.findAndCountAll({
       where: whereClause,
+      order: orderClause,
+      limit: Number(itemsPerPage),
+      offset: offset,
     });
 
-    if (propertiesData.length > 0) {
+    // console.log(propertiesData)
+    
+    const totalItems = propertiesData.count;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    
+    if (propertiesData.rows.length > 0) {
       res.status(200).json({
         isError: false,
-        message:
-          "Successfully retrieved properties data based on search criteria",
-        dataLength: propertiesData.length,
-        propertiesData: propertiesData,
+        message: "Successfully retrieved properties data based on search criteria",
+        totalPages,
+        dataLength: propertiesData.rows.length,
+        propertiesData: propertiesData.rows,
       });
     } else {
       res.status(200).json({
@@ -290,6 +347,7 @@ propertiesRoutes.get("/properties/search", async (req, res) => {
         message: "No properties data found for the specified search criteria",
       });
     }
+    
   } catch (error) {
     console.error(
       "Something went wrong in the /properties/search route:",

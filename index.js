@@ -10,8 +10,7 @@ const app = express();
 app.use(cors())
 app.use(express.json());
 
-app.use("/api", adminRoutes, propertiesRoutes)
-app.use("/user", userRoutes)
+app.use("/api", adminRoutes, propertiesRoutes, userRoutes)
 
 const port = process.env.port || 5006;
 sequelizeConnection.sync().then(async () => {

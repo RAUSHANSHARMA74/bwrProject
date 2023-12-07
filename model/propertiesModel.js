@@ -62,22 +62,30 @@ const PropertiesModel = sequelizeConnection.define("Properties", {
     allowNull: true,
   },
   exact_price: {
-    type: Sequelize.STRING,
+    type: Sequelize.INTEGER,
     allowNull: true,
   },
   price_range: {
-    type: Sequelize.STRING,
+    type: Sequelize.JSON,
     allowNull: true,
   },
   area: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+  },
+  area_range: {
+    type: Sequelize.JSON,
+    allowNull: true,
+  },
+  price_unit : {
     type: Sequelize.STRING,
     allowNull: true,
   },
-  carpet_area: {
+  area_unit : {
     type: Sequelize.STRING,
     allowNull: true,
   },
-  rate_per_sqft: {
+  carpet_area :{
     type: Sequelize.STRING,
     allowNull: true,
   },
@@ -86,11 +94,6 @@ const PropertiesModel = sequelizeConnection.define("Properties", {
     allowNull: true,
   },
   rating: {
-    type: Sequelize.STRING,
-    allowNull: true,
-  },
-
-  built_up: {
     type: Sequelize.STRING,
     allowNull: true,
   },
@@ -192,6 +195,10 @@ const PropertiesModel = sequelizeConnection.define("Properties", {
   },
   virtualTourLink: {
     type: Sequelize.STRING,
+    allowNull: true,
+  },
+  brochure :{
+    type:  Sequelize.STRING,
     allowNull: true,
   },
   date: {

@@ -43,7 +43,7 @@ const UsersModel = sequelizeConnection.define("UserDetails", {
     },
     otp : {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     otpVerify : {
         type: Sequelize.STRING,
